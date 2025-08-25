@@ -1,14 +1,14 @@
 import TourService from "../services/tour.service.js";
-import { SuccessResponse } from "../middlewares/response.middleware.js";
+import { CREATED, SuccessResponse } from "../middlewares/response.middleware.js";
 class TourController {
-    getAllTours = async (req, res) => {
+    getAllTours = async (req, res, next) => {
         new SuccessResponse({
             message: "getAllTour success.",
-            metadata: await TourService.getAllTours()
+            metadata: await TourService.getAllTours(req.query)
         }).send(res);
     }
     createTour = async (req, res, next) => {
-        new SuccessResponse({
+        new CREATED({
             message: "createTour success.",
             metadata: await TourService.createTour(req.body)
         }).send(res);
@@ -29,6 +29,18 @@ class TourController {
         new SuccessResponse({
             message: "deleteTourById success.",
             metadata: await TourService.deleteTourById(req.params.id)
+        }).send(res);
+    }
+    aliasTopTours = async (req, res, next) => {
+        new SuccessResponse({
+            message: "aliasTopTours success.",
+            metadata: await TourService.aliasTopTours(req.query)
+        }).send(res);
+    }
+    stats = async (req, res, next) => {
+        new SuccessResponse({
+            message: "stats success.",
+            metadata: await TourService.stats(req.query)
         }).send(res);
     }
 }

@@ -6,10 +6,10 @@ const router = Router();
 router.route("/")
     .get(catchAsync(tourController.getAllTours))
     .post(catchAsync(tourController.createTour));
+router.route("/top-tours").get(catchAsync(tourController.aliasTopTours));
+router.route("/stats").get(catchAsync(tourController.stats));
 router.route("/:id")
     .get(catchAsync(tourController.getTourById))
     .patch(catchAsync(tourController.updateTourById))
     .delete(catchAsync(tourController.deleteTourById));
-
 export default router;
-
