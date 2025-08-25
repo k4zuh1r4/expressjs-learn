@@ -1,12 +1,6 @@
 const StatusCode = {
     OK: 200,
-    CREATED: 201,
-    NO_CONTENT: 204,
-    BAD_REQUEST: 400,
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    INTERNAL_SERVER_ERROR: 500
+    CREATED: 201
 }
 const ReasonStatusCode = {
     CREATED: 'Created.',
@@ -14,13 +8,13 @@ const ReasonStatusCode = {
 }
 
 export class SuccessResponse {
-    constructor({ message, statusCode = StatusCodes.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {} }) {
+    constructor({ message, statusCode = StatusCode.OK, reasonStatusCode = ReasonStatusCode.OK, metadata = {} }) {
         this.message = !message ? reasonStatusCode : message;
         this.statusCode = statusCode;
         this.metadata = metadata;
     }
     send(res, header = {}) {
-        return res.status(this.status).json(this);
+        return res.status(this.statusCode).json(this);
     }
 
 }
