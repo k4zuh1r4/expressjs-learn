@@ -57,4 +57,36 @@ export default class TourService {
             { $sort: { avgRating: -1 } }
         ]);
     }
+    static async yearStats(req) {
+        const year = req * 1;
+        return await tourModel.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: '$startDates' },
+                    numTourStarts: { $sum: 1 },
+                    tours: { $push: '$name' }
+                }
+            },
+            {
+                $project: { _id: 0 }
+            },
+            {
+                $sort: { numTourStarts: -1 }
+            },
+            {
+                $limit: 12
+            }
+        ])
+    }
 }

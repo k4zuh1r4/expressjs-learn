@@ -8,6 +8,7 @@ router.route("/")
     .post(catchAsync(tourController.createTour));
 router.route("/top-tours").get(catchAsync(tourController.aliasTopTours));
 router.route("/stats").get(catchAsync(tourController.stats));
+router.route("/year-stats/:year").get(catchAsync(tourController.yearStats));
 router.route("/:id")
     .get(catchAsync(tourController.getTourById))
     .patch(catchAsync(tourController.updateTourById))

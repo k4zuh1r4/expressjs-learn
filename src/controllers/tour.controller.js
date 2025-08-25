@@ -43,5 +43,11 @@ class TourController {
             metadata: await TourService.stats(req.query)
         }).send(res);
     }
+    yearStats = async (req, res, next) => {
+        new SuccessResponse({
+            message: "yearStats success.",
+            metadata: await TourService.yearStats(req.params.year)
+        }).send(res);
+    }
 }
 export default new TourController();
