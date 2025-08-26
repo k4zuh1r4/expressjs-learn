@@ -1,8 +1,10 @@
 import express from 'express';
 import errorHandlerMidddleware from './middlewares/errors.middleware.js';
 import router from './routers/index.js';
+import cookieParser from 'cookie-parser';
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 app.use('', router)
 app.get('/', (req, res) => {
     console.log(req);

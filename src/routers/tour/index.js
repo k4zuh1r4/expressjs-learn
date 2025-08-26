@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import tourController from '../../controllers/tour.controller.js';
 import catchAsync from '../../middlewares/catchAsync.middleware.js';
+import { protect, permission } from '../../middlewares/auth.middleware.js';
 const router = Router();
 
 router.route("/")
@@ -12,5 +13,5 @@ router.route("/year-stats/:year").get(catchAsync(tourController.yearStats));
 router.route("/:id")
     .get(catchAsync(tourController.getTourById))
     .patch(catchAsync(tourController.updateTourById))
-    .delete(catchAsync(tourController.deleteTourById));
+    .delete(protect, permission('admin'), catchAsync(tourController.deleteTourById));
 export default router;

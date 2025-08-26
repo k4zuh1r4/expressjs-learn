@@ -27,6 +27,13 @@ export class ForbiddenError extends Error {
         this.statusCode = StatusCodes.FORBIDDEN;
     }
 }
+export class EmailAlreadyExistsError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = 'EmailAlreadyExistsError';
+        this.statusCode = StatusCodes.CONFLICT;
+    }
+}
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.log(err);
     const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
