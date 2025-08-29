@@ -34,6 +34,15 @@ export class EmailAlreadyExistsError extends Error {
         this.statusCode = StatusCodes.CONFLICT;
     }
 }
+export class AppError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+        this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
+        this.isOperational = true;
+        Error.captureStackTrace(this, this.constructor);
+    }
+}
 const errorHandlerMiddleware = (err, req, res, next) => {
     console.log(err);
     const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;

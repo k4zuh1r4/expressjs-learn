@@ -31,25 +31,25 @@ class AuthController {
     logout = async (req, res, next) => {
         new SuccessResponse({
             message: "logout succeeded",
-            metadata: await AuthService.logout()
-        }).send(res);
-    }
-    forgotPassword = async (req, res, next) => {
-        new SuccessResponse({
-            message: "forgot password succeeded",
-            metadata: await AuthService.forgotPassword()
+            metadata: await AuthService.logout(req, res, next)
         }).send(res);
     }
     resetPassword = async (req, res, next) => {
         new SuccessResponse({
             message: "reset password succeeded",
-            metadata: await AuthService.resetPassword()
+            metadata: await AuthService.resetPassword(req, res, next)
         }).send(res);
     }
     updatePassword = async (req, res, next) => {
         new SuccessResponse({
             message: "update password succeeded",
-            metadata: await AuthService.updatePassword()
+            metadata: await AuthService.updatePassword(req, res, next)
+        }).send(res);
+    }
+    forgotPassword = async (req, res, next) => {
+        new SuccessResponse({
+            message: "forgot password succeeded",
+            metadata: await AuthService.forgotPassword(req, res, next)
         }).send(res);
     }
 }

@@ -1,7 +1,8 @@
 import userModel from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
+import { NotFoundError, EmailAlreadyExistsError, AppError } from '../middlewares/errors.middleware.js';
 import { Email } from '../utils/email.js';
-import { NotFoundError, EmailAlreadyExistsError } from '../middlewares/errors.middleware.js';
+import crypto from 'crypto'
 export default class AuthService {
     static async register(user, req, res) {
         const existingUser = await userModel.findOne({ email: user.email }).exec();
@@ -34,25 +35,61 @@ export default class AuthService {
         }
         return await this.createSendToken(user, 200, req, res);
     }
-    static async logout() {
-        return {
-            message: 'User logged out successfully'
+    static async logout(req, res, next) {
+        res.cookie('jwt', 'loggedout', {
+            expires: new Date(Date.now() + 10 * 1000),
+            httpOnly: true
+        })
+        return { status: 'success' }
+    }
+    static async forgotPassword(req, res, next) {
+        const user = await userModel.findOne({ email: req.body.email });
+        if (!user) {
+            throw new AppError('There is no user with email address.', 404);
+        }
+        const resetToken = user.createPasswordResetToken();
+        await user.save({ validateBeforeSave: false });
+        try {
+            const resetURL = `${req.protocol}://${req.get('host')}/api/v1/users/resetPassword/${resetToken}`;
+            await new Email(user, resetURL).send('passwordReset');
+            return {
+                message: 'Password reset email sent successfully'
+            }
+        } catch (error) {
+            console.log(error);
+            user.passwordResetToken = undefined;
+            user.passwordResetExpires = undefined;
+            await user.save({ validateBeforeSave: false });
+            throw new AppError('Error sending password reset email', 500);
         }
     }
-    static async forgotPassword() {
-        return {
-            message: "forgotPassword succeeded"
+    static async resetPassword(req, res, next) {
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+        const user = await userModel.findOne({
+            passwordResetToken: hashedToken,
+            passwordResetExpires: { $gt: Date.now() }
+        })
+        //if token is valid + valid user then set new password, else throw error.
+        if (!user) {
+            throw new AppError('Token is invalid or has expired', 400);
         }
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        user.passwordResetToken = undefined;
+        user.passwordResetExpires = undefined;
+        await user.save();
+        //update changePasswordAt + log user + send JWT
+        return this.createSendToken(user, 200, req, res);
     }
-    static async resetPassword() {
-        return {
-            message: "resetPassword succeeded"
+    static async updatePassword(req, res, next) {
+        const user = await userModel.findById(req.user.id).select('+password');
+        if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+            throw new AppError('Your current password is wrong.', 401);
         }
-    }
-    static async updatePassword() {
-        return {
-            message: "updatePassword succeeded"
-        }
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        await user.save();
+        return this.createSendToken(user, 200, req, res);
     }
     static async signToken(id) {
         return jwt.sign({ id }, process.env.JWT_SECRET, {
